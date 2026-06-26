@@ -2,6 +2,7 @@
 name = "example-mcp-server"
 dynamic = ["version"]
 description = "Runnable MCP server exposing the governance-audit tool over stdio (import/build-isolated workspace member)."
+readme = "README.md"
 authors = [{ name = "Phillip Anderson", email = "panderson@integrate-it.com.au" }]
 license = "Apache-2.0"
 requires-python = ">=3.12"

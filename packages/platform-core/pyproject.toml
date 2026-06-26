@@ -2,6 +2,7 @@
 name = "platform-core"
 dynamic = ["version"]
 description = "Shared runtime: the pydantic-ai governance-audit agent, its tool(s), settings, and tracing."
+readme = "README.md"
 authors = [{ name = "Phillip Anderson", email = "panderson@integrate-it.com.au" }]
 license = "Apache-2.0"
 requires-python = ">=3.12"

@@ -16,6 +16,7 @@ from __future__ import annotations
 import re
 import tomllib
 from pathlib import Path
+from typing import cast
 
 import pytest
 
@@ -250,6 +251,21 @@ def test_every_service_ships_a_dockerfile() -> None:
 
 
 def test_markdown_only_at_root_allowlist_or_under_docs() -> None:
+    # A publishable workspace member may carry ONE README.md at its root (its PyPI
+    # long-description). Permit exactly that — a file named README.md whose parent IS a
+    # declared member root — and nothing else: no other filename, no deeper nesting, no
+    # member subdir markdown. (Resolved from the actual member globs, not hardcoded.)
+    #
+    # Member roots are the UNRESOLVED glob-relative paths, compared against equally unresolved
+    # rglob paths. Resolving one side only (the bug `_workspace_members()` would introduce here
+    # via `.resolve()`) lets a junction/symlinked member both false-reject its real README and
+    # false-accept markdown at the resolve target — so never resolve either side.
+    member_roots = {
+        match.relative_to(REPO_ROOT)
+        for glob in _member_globs()
+        for match in REPO_ROOT.glob(glob)
+        if match.is_dir()
+    }
     offenders: list[str] = []
     for md in _iter_repo_files(".md"):
         rel = md.relative_to(REPO_ROOT)
@@ -257,9 +273,43 @@ def test_markdown_only_at_root_allowlist_or_under_docs() -> None:
         if len(parts) == 1:
             if rel.name not in ROOT_MD_ALLOWLIST:
                 offenders.append(str(rel))
-        elif parts[0] not in {"docs", ".github"}:
+        elif parts[0] in {"docs", ".github"} or (
+            rel.name == "README.md" and rel.parent in member_roots
+        ):
+            continue
+        else:
             offenders.append(str(rel))
-    assert not offenders, f"markdown outside root-allowlist / docs / .github: {offenders}"
+    assert not offenders, (
+        "markdown outside root-allowlist / docs / .github / member README.md: " + repr(offenders)
+    )
+
+
+def test_declared_member_readme_resolves() -> None:
+    """A member's ``[project].readme`` must point at a file that exists.
+
+    A dangling ``readme`` reference is a silent-failure: the build ships an sdist/wheel whose
+    PyPI long-description is broken (or the build errors late). Catch it at the structure gate.
+    """
+    problems: list[str] = []
+    for member in _workspace_members():
+        pyproject = member / "pyproject.toml"
+        if not pyproject.is_file():
+            continue
+        data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+        readme = data.get("project", {}).get("readme")
+        # PEP 621 readme is either a string path OR a table {file=...} / {text=...}. Only the
+        # file forms reference a path that can dangle; the inline {text=...} form has no file.
+        readme_file: str | None = None
+        if isinstance(readme, str):
+            readme_file = readme
+        elif isinstance(readme, dict):
+            candidate = cast("dict[str, object]", readme).get("file")
+            if isinstance(candidate, str):
+                readme_file = candidate
+        if readme_file is not None and not (member / readme_file).is_file():
+            rel = member.relative_to(REPO_ROOT)
+            problems.append(f"{rel}: [project].readme={readme_file!r} does not exist")
+    assert not problems, "dangling member readme reference:\n  " + "\n  ".join(problems)
 
 
 def test_docs_knowledge_artefacts_have_enum_valid_frontmatter() -> None:

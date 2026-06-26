@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from pathlib import Path
 
 from platform_core.tools import DEFAULT_REQUIRED, AuditReport, audit_structure
 
+# Mirrors the `make_repo` fixture's return type in conftest.py. Declared locally because
+# tests/ is not an importable package and a shared tests/_types.py would trip the
+# structure-lint (non-test .py under tests/).
+MakeRepo = Callable[[Iterable[str]], Path]
 
-def test_conforms_when_all_required_present(make_repo) -> None:
+
+def test_conforms_when_all_required_present(make_repo: MakeRepo) -> None:
     repo = make_repo(DEFAULT_REQUIRED)
     report = audit_structure(str(repo))
     assert isinstance(report, AuditReport)
@@ -16,7 +22,7 @@ def test_conforms_when_all_required_present(make_repo) -> None:
     assert sorted(report.present) == sorted(DEFAULT_REQUIRED)
 
 
-def test_reports_drift_when_required_missing(make_repo) -> None:
+def test_reports_drift_when_required_missing(make_repo: MakeRepo) -> None:
     repo = make_repo(["README.md", "pyproject.toml"])  # LICENSE absent
     report = audit_structure(str(repo))
     assert report.conforms is False
@@ -24,7 +30,7 @@ def test_reports_drift_when_required_missing(make_repo) -> None:
     assert set(report.present) == {"README.md", "pyproject.toml"}
 
 
-def test_empty_dir_is_all_drift(make_repo) -> None:
+def test_empty_dir_is_all_drift(make_repo: MakeRepo) -> None:
     repo = make_repo([])
     report = audit_structure(str(repo))
     assert report.conforms is False
@@ -32,7 +38,7 @@ def test_empty_dir_is_all_drift(make_repo) -> None:
     assert report.present == []
 
 
-def test_custom_required_set(make_repo) -> None:
+def test_custom_required_set(make_repo: MakeRepo) -> None:
     repo = make_repo(["a.txt"])
     report = audit_structure(str(repo), required=("a.txt", "b.txt"))
     assert report.conforms is False

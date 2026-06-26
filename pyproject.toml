@@ -32,12 +32,20 @@ target-version = "py312"
 src = ["packages/platform-core/src", "services/example-mcp-server/src"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP", "SIM"]
+# E/F/I/B/UP/SIM: style, pyflakes, import-sort, bugbear, pyupgrade, simplify.
+# ASYNC: async-correctness (the codebase runs asyncio_mode="auto").
+# S: bandit security rules (an MCP server processes untrusted tool input).
+# RUF: ruff's own lints (e.g. unused noqa, mutable-default surface).
+select = ["E", "F", "I", "B", "UP", "SIM", "ASYNC", "S", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests legitimately use bare `assert` (S101) — that's how pytest asserts.
+"tests/**" = ["S101"]
 
 [tool.pyright]
 typeCheckingMode = "strict"
 pythonVersion = "3.12"
-include = ["packages", "services"]
+include = ["packages", "services", "tests"]
 venvPath = "."
 venv = ".venv"
 
