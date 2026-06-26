@@ -2,6 +2,8 @@
 name = "platform-core"
 dynamic = ["version"]
 description = "Shared runtime: the pydantic-ai governance-audit agent, its tool(s), settings, and tracing."
+authors = [{ name = "Phillip Anderson", email = "panderson@integrate-it.com.au" }]
+license = "Apache-2.0"
 requires-python = ">=3.12"
 dependencies = [
     "pydantic-ai-slim[anthropic,mcp]>=1.0",
@@ -17,7 +19,10 @@ build-backend = "hatchling.build"
 
 [tool.hatch.version]
 source = "vcs"
-raw-options = { root = "../.." }
+# root: hatch-vcs reads git tags from the workspace root. fallback_version: builds without
+# a .git (container build context, sdist/tarball) get a deterministic version instead of
+# hard-failing; host/CI builds with git history still derive the real tag-based version.
+raw-options = { root = "../..", fallback_version = "0.0.0" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/platform_core"]

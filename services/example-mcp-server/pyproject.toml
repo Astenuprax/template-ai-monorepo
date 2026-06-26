@@ -2,6 +2,8 @@
 name = "example-mcp-server"
 dynamic = ["version"]
 description = "Runnable MCP server exposing the governance-audit tool over stdio (import/build-isolated workspace member)."
+authors = [{ name = "Phillip Anderson", email = "panderson@integrate-it.com.au" }]
+license = "Apache-2.0"
 requires-python = ">=3.12"
 dependencies = [
     "platform-core",
@@ -17,7 +19,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.version]
 source = "vcs"
-raw-options = { root = "../.." }
+# fallback_version lets the container build (no .git in context) and sdists resolve a version
+# deterministically; git-backed host/CI builds still derive the real tag-based version.
+raw-options = { root = "../..", fallback_version = "0.0.0" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/example_mcp_server"]

@@ -41,8 +41,15 @@ include = ["packages", "services"]
 venvPath = "."
 venv = ".venv"
 
+# Authoritative declaration of the structure-standard version this repo conforms to.
+# tests/test_structure.py asserts its CONFORMS_TO_STRUCTURE_VERSION matches this value,
+# so bumping the rules without bumping this (or vice-versa) fails the gate. A machine-
+# readable home that the Phase-2 config-audit meta-check can import without loading pytest.
+[tool.structure_lint]
+version = 1
+
 [tool.pytest.ini_options]
-testpaths = ["packages", "services"]
+testpaths = ["tests"]
 asyncio_mode = "auto"
 addopts = "-ra"
 markers = [
