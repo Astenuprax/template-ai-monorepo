@@ -1,0 +1,50 @@
+# Workspace root (virtual — not itself a distributable package).
+# Members are built/installed individually; the workspace shares ONE uv.lock + ONE venv.
+# Isolation semantics: import-namespace + separately-buildable distributions — NOT per-service
+# dependency isolation (a deliberate dev-convenience; see docs/adr/0001-uv-workspace.md).
+[project]
+name = "template-ai-monorepo"
+version = "0"
+description = "Golden-standard AI/agentic monorepo template (uv workspace; pydantic-ai agent + MCP server)."
+requires-python = ">=3.12"
+readme = "README.md"
+
+[tool.uv.workspace]
+members = ["packages/*", "services/*"]
+
+[tool.uv.sources]
+platform-core = { workspace = true }
+example-mcp-server = { workspace = true }
+
+# Dev tooling pinned in the lock (reproducible) and run via `uv run` so it sees the workspace venv.
+# pyright in particular MUST run inside the venv to resolve first/third-party imports.
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.7",
+    "pyright>=1.1.380",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["packages/platform-core/src", "services/example-mcp-server/src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+pythonVersion = "3.12"
+include = ["packages", "services"]
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["packages", "services"]
+asyncio_mode = "auto"
+addopts = "-ra"
+markers = [
+    "integration: live agent<->model run; needs ANTHROPIC_API_KEY; excluded from the CI gate",
+]

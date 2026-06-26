@@ -1,0 +1,23 @@
+[project]
+name = "platform-core"
+dynamic = ["version"]
+description = "Shared runtime: the pydantic-ai governance-audit agent, its tool(s), settings, and tracing."
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic-ai-slim[anthropic,mcp]>=1.0",
+    "pydantic-settings>=2.5",
+]
+
+[project.scripts]
+governance-agent = "platform_core.agent:main"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { root = "../.." }
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/platform_core"]

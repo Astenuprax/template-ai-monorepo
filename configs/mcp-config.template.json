@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "governance-audit": {
+      "command": "python",
+      "args": ["-m", "example_mcp_server.server"]
+    },
+    "governance-audit-container": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "example-mcp-server:latest"]
+    }
+  }
+}

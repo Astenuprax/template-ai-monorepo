@@ -1,0 +1,23 @@
+[project]
+name = "example-mcp-server"
+dynamic = ["version"]
+description = "Runnable MCP server exposing the governance-audit tool over stdio (import/build-isolated workspace member)."
+requires-python = ">=3.12"
+dependencies = [
+    "platform-core",
+    "mcp>=1.2",
+]
+
+[project.scripts]
+example-mcp-server = "example_mcp_server.server:main"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { root = "../.." }
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/example_mcp_server"]
