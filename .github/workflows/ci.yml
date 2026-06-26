@@ -61,18 +61,21 @@ jobs:
           name: sbom-cyclonedx
           path: sbom.cdx.json
 
-  audit:
-    name: audit (pip-audit)
-    runs-on: ubuntu-latest
+  # Dependency CVE gate. Scans the committed uv.lock directly (the exact resolved set,
+  # install-independent) with OSV-Scanner — the OpenSSF-ecosystem scanner, coherent with this
+  # repo's Scorecard + SLSA + SBOM supply-chain posture, and native to uv.lock. Engine +
+  # invocation verified green locally (osv-scanner v2.4.0, `--lockfile=uv.lock`: 79 packages,
+  # 2 local workspace members filtered, 0 issues). The reusable workflow uploads SARIF to the
+  # Security tab; that upload activates once the repo is public (free code-scanning) — the same
+  # active-when-public model as scorecard.yml. Pinned to a commit SHA (supply-chain mandate).
+  osv-scan:
+    name: osv-scan (uv.lock)
     needs: check
     permissions:
+      actions: read
+      security-events: write
       contents: read
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
-        with:
-          python-version: "3.12"
-      - name: Sync workspace
-        run: uv sync --all-packages --frozen
-      - name: Audit installed dependencies for known CVEs
-        run: uv run --with pip-audit pip-audit
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@9a498708959aeaef5ef730655706c5a1df1edbc2 # v2.3.8
+    with:
+      scan-args: |-
+        --lockfile=uv.lock
