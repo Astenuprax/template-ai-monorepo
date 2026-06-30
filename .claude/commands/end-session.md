@@ -68,11 +68,19 @@ carry-forward, free-text flagging, non-blocking reconcile, summary line, all 8 s
 Two project augmentations, applied at the 2a scaffold and the 2d Gate-6 step:
 
 1. **Commits set is the UNION across `THIS repo + SIBLING_REPOS`.** In 2a, after building this repo's
-   `COMMITS_TSV`, append each sibling's session commits. Derive a sibling's session commits as those with
-   author-date `>=` the **prior handoff's date** (parsed from the prior `HANDOFF_GLOB` filename
-   `handoff-sessionN-YYYY-MM-DD.md`) — a per-repo `git -C <sibling> log --since=<date> --format=...`.
-   The Commits table gains a leading **`Repo`** column; rows are grouped by repo. (Files Modified stays
-   THIS-repo-scoped — sibling files live in their own repos; capture sibling file work in prose, not a table.)
+   `COMMITS_TSV`, append each sibling's session commits. **Derive a sibling's session commits by SHA range,
+   not by date:** parse that sibling's prior HEAD short-SHA from the **prior handoff's Infrastructure-State
+   section** (the `<repo>: <branch>@<short-sha>` line this override writes — see `INFRA_PROBES` below) and run
+   `git -C <sibling> log <prior-sha>..HEAD --format=...`. This is exact and **same-day-robust**. *Why not
+   `--since=<prior-handoff-date>` (the original approach — replaced):* git resolves a bare, time-less date to
+   the **current time-of-day**, not midnight, so on any same-calendar-day run `--since=<today>` silently drops
+   every sibling commit made earlier that day — a total miss, not mere coarseness (caught session-9: it
+   returned ZERO across all three siblings, all committed earlier the same day). **Fallback** only if a
+   baseline SHA is unparseable (e.g. a prior handoff predating this override's Infrastructure-State format):
+   `git -C <sibling> log --since="<date> 00:00:00" ...` — the explicit midnight defeats the time-of-day drop,
+   though it still cannot separate two same-day sessions. The Commits table gains a leading **`Repo`** column;
+   rows are grouped by repo. (Files Modified stays THIS-repo-scoped — sibling files live in their own repos;
+   capture sibling file work in prose, not a table.)
 2. **Gate 6 hash allowlist = the union set.** Every hash-shaped token in the handoff must exist in the
    union `COMMITS_TSV` (this repo ∪ siblings), not just this repo's — otherwise legitimate sibling-repo
    hashes false-fail as "fabricated." Build `SCAFFOLD_HASHES` from the union.
