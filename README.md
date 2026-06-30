@@ -2,7 +2,7 @@
 
 A golden-standard template for AI/agentic Python monorepos, managed as a single `uv` workspace. The worked example is a `pydantic-ai` governance-audit agent (`platform-core`) that reaches a tool through an MCP server (`example-mcp-server`) over stdio, demonstrating a self-checking governance audit end to end.
 
-[![CI](https://github.com/iitapanderson/template-ai-monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/iitapanderson/template-ai-monorepo/actions/workflows/ci.yml)
+[![CI](https://github.com/Astenuprax/template-ai-monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/Astenuprax/template-ai-monorepo/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 
