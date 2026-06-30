@@ -8,10 +8,11 @@ Import/build-isolated workspace member: depends on `platform-core` explicitly an
 
 ## Run
 
-As a container (the shipping artefact — see `Dockerfile`):
+As a container (the shipping artefact — build from the **repo root** so the workspace
+lockfile and `packages/` are in the build context; see `Dockerfile`):
 
 ```console
-docker build -t example-mcp-server .
+docker build -f services/example-mcp-server/Dockerfile -t example-mcp-server .
 docker run -i example-mcp-server          # stdio transport
 ```
 
