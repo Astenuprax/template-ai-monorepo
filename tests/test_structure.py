@@ -27,24 +27,58 @@ CONFORMS_TO_STRUCTURE_VERSION = 1
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
+
+def _structure_lint_cfg() -> dict[str, object]:
+    """The root pyproject's ``[tool.structure_lint]`` table — the hoisted structure-lint DATA
+    (``root_required`` / ``py_source_roots`` / ``member_roots``). Only these stack-specific lists
+    are config-sourced; all *behaviour* (the pin regexes, the frontmatter enums, the version
+    marker, and the ``*_FLOOR`` shrink-guards below) stays hardcoded in this module (spike §4.2)."""
+    data = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    return data.get("tool", {}).get("structure_lint", {})
+
+
+def _required_list(key: str) -> tuple[str, ...]:
+    """Read a required list from ``[tool.structure_lint]``. A missing key raises at import time —
+    fail-closed: the gate refuses to lint on absent data rather than vacuously passing (the safe
+    direction). The element ``str()`` coercion mirrors ``_member_globs``' house idiom."""
+    cfg = _structure_lint_cfg()
+    if key not in cfg:
+        raise KeyError(
+            f"[tool.structure_lint].{key} missing from pyproject.toml — the structure-lint data "
+            f"was deleted; restore it. The gate fails closed rather than linting on empty data."
+        )
+    return tuple(str(x) for x in cast("list[object]", cfg[key]))
+
+
 # Root furniture every repo of this archetype must carry (the standard's required surface).
-ROOT_REQUIRED: tuple[str, ...] = (
-    "README.md",
-    "LICENSE",
-    "NOTICE",
-    "CHANGELOG.md",
-    "CODE_OF_CONDUCT.md",
-    "CONTRIBUTING.md",
-    "SECURITY.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "pyproject.toml",
-    "uv.lock",
-    ".gitignore",
-    ".editorconfig",
-    ".pre-commit-config.yaml",
-    ".python-version",
+# Hoisted to [tool.structure_lint].root_required (spike §4.2) so a base/python-overlay split can
+# own it; the non-shrinkable minimum is guarded by the two-tier floor below.
+ROOT_REQUIRED: tuple[str, ...] = _required_list("root_required")
+
+# --- Two-tier shrink-floor (HARDCODED in the harness — never hoisted) ----------------
+# The structure-lint's non-negotiable minimum. These frozensets live in the test HARNESS (not in
+# pyproject) on purpose: the floor is the shrink-defence for the config-sourced lists above, so
+# sourcing it from the same file it guards would make the guard circular and vacuous — a consumer
+# could shrink data AND floor in one edit. DO NOT hoist these. (spike §4.3 / §4.4)
+_ROOT_REQUIRED_FLOOR: frozenset[str] = frozenset(
+    {
+        "README.md",
+        "LICENSE",
+        "NOTICE",
+        "CHANGELOG.md",
+        "CODE_OF_CONDUCT.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".gitignore",
+        ".editorconfig",
+    }
 )
+_PY_ROOT_REQUIRED_FLOOR: frozenset[str] = frozenset(
+    {"pyproject.toml", "uv.lock", ".pre-commit-config.yaml", ".python-version"}
+)
+_PY_MEMBER_ROOTS_FLOOR: frozenset[str] = frozenset({"packages", "services"})
 
 # Markdown allowed at the repo ROOT (everything else markdown must live under docs/).
 ROOT_MD_ALLOWLIST: frozenset[str] = frozenset(
@@ -64,7 +98,8 @@ FRONTMATTER_TYPES: frozenset[str] = frozenset({"SKILL", "WORKFLOW", "LESSON", "A
 FRONTMATTER_STATUS: frozenset[str] = frozenset({"EXPERIMENTAL", "VERIFIED", "DEPRECATED"})
 
 # Directories that legitimately hold Python source (file-placement allowlist).
-_PY_SOURCE_ROOTS = ("packages", "services", "tests")
+# Hoisted to [tool.structure_lint].py_source_roots (spike §4.2); 'tests' membership floored below.
+_PY_SOURCE_ROOTS: tuple[str, ...] = _required_list("py_source_roots")
 
 # A SHA-pinned Action ref ends in a 40-char hex commit (supply-chain mandate, dec.10).
 # `uses:` is matched ANYWHERE on the line (not just line-leading) so a flow-style
@@ -182,6 +217,43 @@ def test_version_marker_matches_declaration() -> None:
     )
 
 
+# --- Config-hoist shrink-floor -------------------------------------------------------
+
+
+def test_base_floor_not_weakened() -> None:
+    """The stack-agnostic base-furniture floor cannot be shrunk out of ``root_required``.
+
+    Hoisting the lists (spike §4.2) lets the lint source its expectations from the repo it lints;
+    this hardcoded floor (spike §4.3/§4.4) is the shrink-defence — an overlay that drops e.g.
+    ``LICENSE`` from ``root_required`` to dodge ``test_required_root_file_present`` fails HERE
+    instead of silently weakening the gate.
+    """
+    root_required = frozenset(ROOT_REQUIRED)
+    missing = _ROOT_REQUIRED_FLOOR - root_required
+    assert not missing, f"root_required shrank below the base-furniture floor: {sorted(missing)}"
+
+
+def test_python_stack_floor_not_weakened() -> None:
+    """The python-uv stack's own non-shrinkable rows (mirrors the base floor, for the stack).
+
+    ``uv.lock`` / ``pyproject.toml`` / ``.pre-commit-config.yaml`` / ``.python-version`` and the
+    ``packages``+``services`` member roots are hard-enforced today; this floor stops a consumer
+    silently removing them from the hoisted config (spike §4.3 — python-stack floor).
+    """
+    root_required = frozenset(ROOT_REQUIRED)
+    member_roots = frozenset(_ALLOWED_MEMBER_ROOTS)
+    py_source_roots = frozenset(_PY_SOURCE_ROOTS)
+    missing_roots = _PY_ROOT_REQUIRED_FLOOR - root_required
+    missing_members = _PY_MEMBER_ROOTS_FLOOR - member_roots
+    assert not missing_roots, (
+        f"python-uv root files are non-negotiable; missing: {sorted(missing_roots)}"
+    )
+    assert not missing_members, (
+        f"member_roots shrank below the python floor: {sorted(missing_members)}"
+    )
+    assert "tests" in py_source_roots, "py_source_roots must include 'tests'"
+
+
 # --- Root furniture ------------------------------------------------------------------
 
 
@@ -219,7 +291,8 @@ def test_python_sources_only_in_allowed_roots() -> None:
 # --- Workspace member integrity ------------------------------------------------------
 
 
-_ALLOWED_MEMBER_ROOTS = ("packages", "services")
+# Hoisted to [tool.structure_lint].member_roots (spike §4.2); packages+services floored above.
+_ALLOWED_MEMBER_ROOTS: tuple[str, ...] = _required_list("member_roots")
 
 
 def test_every_member_has_typed_src_package() -> None:

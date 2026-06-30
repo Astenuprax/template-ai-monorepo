@@ -53,8 +53,21 @@ venv = ".venv"
 # tests/test_structure.py asserts its CONFORMS_TO_STRUCTURE_VERSION matches this value,
 # so bumping the rules without bumping this (or vice-versa) fails the gate. A machine-
 # readable home that the Phase-2 config-audit meta-check can import without loading pytest.
+#
+# `version` is base-owned and HARNESS-INVARIANT (cross-asserted, never overlay-mutable). The
+# three lists below are the stack-specific structure-lint data, hoisted here so a future
+# base/python-overlay split can partition them; test_structure.py reads them and enforces a
+# two-tier shrink-floor (its hardcoded *_FLOOR sets) so they cannot be weakened below the
+# base-furniture + python-uv minimums.
 [tool.structure_lint]
 version = 1
+root_required = [
+  "README.md", "LICENSE", "NOTICE", "CHANGELOG.md", "CODE_OF_CONDUCT.md",
+  "CONTRIBUTING.md", "SECURITY.md", "AGENTS.md", "CLAUDE.md", ".gitignore", ".editorconfig",
+  "pyproject.toml", "uv.lock", ".pre-commit-config.yaml", ".python-version",
+]
+py_source_roots = ["packages", "services", "tests"]
+member_roots = ["packages", "services"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
