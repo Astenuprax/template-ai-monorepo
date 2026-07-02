@@ -92,7 +92,7 @@ and `docs/adr/≥0004` rules below (no explicit row needed; class-covered). Laye
 | `docs/planning/PLAN.md` | user-data | skip_if_exists | low | no | Project planning state; user owns. |
 | `docs/planning/README.md` | user-data | skip_if_exists | low | no | Planning-dir index; seeded once, user owns. |
 | `docs/planning/TRACKER.md` | user-data | skip_if_exists | low | no | Project planning state; user owns. (Location reconciliation: WS-0/WS-6 #1.) |
-| `docs/registers/deferred-hardening.md` | user-data | skip_if_exists | low | no | The durable debt register; template seeds, project accretes; never clobber. |
+| `docs/planning/DEBT.md` | user-data | skip_if_exists | low | no | The durable debt register; template seeds, project accretes; never clobber. (Renamed from `docs/registers/deferred-hardening.md` 2026-07-02 — retired filename, and relocated to the AI-monorepo `docs/planning/` carve-out.) |
 | `justfile` | base + python-stack | re-render | low | no | Base mandates presence; python-stack owns the uv recipes. |
 | `packages/platform-core/README.md` | python-stack | skip_if_exists | **high** | no | Member long-description; path carries the package name → rename orphans it. |
 | `packages/platform-core/pyproject.toml` | python-stack | skip_if_exists | **high** | **yes** | Member manifest; its name is referenced by root `[tool.uv.sources]`; rename orphans the dir (copier won't delete). |
@@ -139,7 +139,7 @@ and `docs/adr/≥0004` rules below (no explicit row needed; class-covered). Laye
   is `skip_if_exists`. Whole-file skip is rejected — it would freeze the governance pointers and let them rot.
 - **`LICENSE` (re-render, not skip)** — verbatim Apache-2.0, no user data; **re-render** so a drifted/edited licence is
   restored. `skip_if_exists` is the trap to avoid (it preserves a tampered licence).
-- **user-data** (`README`/`CHANGELOG`/`NOTICE`/`.env.example`/`docs/planning/*`/`deferred-hardening.md`) — all
+- **user-data** (`README`/`CHANGELOG`/`NOTICE`/`.env.example`/`docs/planning/*`/`DEBT.md`) — all
   `skip_if_exists`. Example *code* members are also `skip_if_exists` seed the user evolves — with required scaffold
   markers (`py.typed`, the service `Dockerfile`) kept **re-render** because structure-lint asserts their presence. Every
   member-pathed file is **high rename-risk**: a package/service rename orphans `src/<name>/` (copier never deletes) and

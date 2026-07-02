@@ -1,11 +1,11 @@
 ---
-id: REF-DEFERRED-HARDENING-001
+id: REF-DEBT-001
 type: REFERENCE
 status: VERIFIED
-gist: Durable register of consciously-deferred hardening and known gaps for template-ai-monorepo — the one place "not yet done" work lives, per repo-hygiene §3.
+gist: Durable DEBT register — consciously-deferred hardening and known gaps for template-ai-monorepo — the one place "not yet done" work lives, per repo-hygiene §3.
 ---
 
-# Deferred-Hardening Register
+# DEBT Register
 
 The single durable home for **consciously-deferred** work and known gaps in
 `template-ai-monorepo`. Per `repo-hygiene` §3, known gaps live in ONE register —

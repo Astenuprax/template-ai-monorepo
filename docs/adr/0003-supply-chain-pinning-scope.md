@@ -41,7 +41,7 @@ Pros:
 
 Cons:
 
-- **pre-commit and Docker refs remain mutable** — a moved tag could alter a local hook run or a base layer. Mitigated by specific patch tags and by confining the unpinned surfaces to the local-dev / undeployed-example paths. Tracked as **D-7** in `docs/registers/deferred-hardening.md` (no automated update path for these ecosystems).
+- **pre-commit and Docker refs remain mutable** — a moved tag could alter a local hook run or a base layer. Mitigated by specific patch tags and by confining the unpinned surfaces to the local-dev / undeployed-example paths. Tracked as **D-7** in `docs/planning/DEBT.md` (no automated update path for these ecosystems).
 
 ## Alternatives considered
 

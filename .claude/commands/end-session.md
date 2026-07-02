@@ -24,7 +24,7 @@ worktree parallelism, Claude Code task primitives for background state.
 |---|---|
 | `SESSIONS_DIR` | `docs/sessions` |
 | `HANDOFF_GLOB` | `handoff-session*.md` |
-| `REGISTER_ACTIVE` | `docs/registers/deferred-hardening.md` |
+| `REGISTER_ACTIVE` | `docs/planning/DEBT.md` |
 | `REGISTER_RESOLVED` | (unset — the register carries its own `## Closed` section) |
 | `ID_PREFIXES` | `D\|WS\|ADR` |
 | `CLOSED_STATUSES` | (unset — register-cleanup inject omitted) |

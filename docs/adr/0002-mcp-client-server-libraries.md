@@ -28,7 +28,7 @@ Keep both libraries, each on the side where it is idiomatic, **and** make the cl
 
 - **Client = `fastmcp` (the `fastmcp-slim[client]` distribution).** pydantic-ai's MCP toolset is built on the `fastmcp` client; using its transport is the supported, lowest-friction integration. The `fastmcp` import namespace is provided by **`fastmcp-slim[client]`** (what `pydantic-ai-slim[mcp]` resolves), **not** the full `fastmcp` package — which would clash on the same namespace or drag the server tree into `platform-core`. Fighting that to force a single library buys nothing for a template.
 - **Server = official `mcp` SDK FastMCP.** The first-party SDK is the canonical way to author an MCP server, and it is what a cloner should copy when writing their own.
-- **Declare `fastmcp-slim[client]` as a direct dependency of `platform-core`** ("depend on what you import" — it provides the `fastmcp` namespace the client imports). Tracked as **D-3** in `docs/registers/deferred-hardening.md`; **shipped in the `template-mcp-capability` overlay**.
+- **Declare `fastmcp-slim[client]` as a direct dependency of `platform-core`** ("depend on what you import" — it provides the `fastmcp` namespace the client imports). Tracked as **D-3** in `docs/planning/DEBT.md`; **shipped in the `template-mcp-capability` overlay**.
 
 ## Consequences
 
