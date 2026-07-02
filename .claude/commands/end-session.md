@@ -49,7 +49,7 @@ content** here → omitted. Phase **6** (cache) self-skips (no `.agent/MANIFEST.
 |---|-------|------|--------|
 | 0 | Pre-close triage | — (omitted, no inject) | — |
 | 1 | Git state + push | always (push gated by `PUSH_POLICY=confirm`) | `~/.agents/workflows/modules/core-git.md` |
-| 2 | **Handoff (cross-repo)** | `SESSIONS_DIR` set AND (commits ≠ ∅ in THIS repo OR any `SIBLING_REPOS` OR modified files ≠ ∅) | `~/.agents/workflows/modules/core-handoff-hybrid.md` **+ the cross-repo extension below** |
+| 2 | **Handoff (cross-repo)** | `SESSIONS_DIR` set AND (commits ≠ ∅ in THIS repo OR any `SIBLING_REPOS` OR modified files ≠ ∅) | `~/.agents/workflows/modules/core-handoff.md` **+ the cross-repo extension below** |
 | 3 | Register cleanup | — (omitted, no inject) | — |
 | 4 | Worktree hygiene | `WORKTREES_DIR` unset → omitted | `~/.agents/workflows/modules/core-worktree.md` |
 | 5 | Background cleanup | active wakeup/monitor/bg task exists | `~/.agents/workflows/modules/core-background-cleanup.md` |
@@ -63,34 +63,51 @@ session id). Non-fatal.
 
 ## Phase 2 — cross-repo extension (the only contract-bearing change)
 
-`core-handoff-hybrid` is used **unchanged** for the §core-handoff floor (write-before-archive, Unaccounted
-carry-forward, free-text flagging, non-blocking reconcile, summary line, all 8 sections, Verification Gaps).
-Two project augmentations, applied at the 2a scaffold and the 2d Gate-6 step:
+`core-handoff.md` (status `VERIFIED`) is used **unchanged** for the §core-handoff floor (write-before-archive,
+Unaccounted carry-forward, free-text flagging, non-blocking reconcile, summary line, all 8 sections,
+Verification Gaps). Its own execution is a flat 5-step sequence — 1. Write the handoff directly, 2. Verify
+non-zero size, 3. Reconcile the outgoing handoff, 4. Archive the prior handoff (bounded retention, keep last
+3), 5. optional Gemini-usage cost-capture line — with no delegated-LLM prose step and therefore no
+provenance-fabrication gate to extend. (This override previously targeted `core-handoff-hybrid.md`, a
+5-sub-step decomposition that offloaded prose generation to Gemini Flash behind a Gate-6 fabrication check;
+that module was retired 2026-07-01 after a real fabrication incident and the global orchestrator's Phase 2
+switchpoint was flipped back to `core-handoff.md`. This override is updated to match.)
 
-1. **Commits set is the UNION across `THIS repo + SIBLING_REPOS`.** In 2a, after building this repo's
-   `COMMITS_TSV`, append each sibling's session commits. **Derive a sibling's session commits by SHA range,
-   not by date:** parse that sibling's prior HEAD short-SHA from the **prior handoff's Infrastructure-State
-   section** (the `<repo>: <branch>@<short-sha>` line this override writes — see `INFRA_PROBES` below) and run
-   `git -C <sibling> log <prior-sha>..HEAD --format=...`. This is exact and **same-day-robust**. *Why not
-   `--since=<prior-handoff-date>` (the original approach — replaced):* git resolves a bare, time-less date to
-   the **current time-of-day**, not midnight, so on any same-calendar-day run `--since=<today>` silently drops
-   every sibling commit made earlier that day — a total miss, not mere coarseness (caught session-9: it
-   returned ZERO across all three siblings, all committed earlier the same day). **Fallback** only if a
-   baseline SHA is unparseable (e.g. a prior handoff predating this override's Infrastructure-State format):
-   `git -C <sibling> log --since="<date> 00:00:00" ...` — the explicit midnight defeats the time-of-day drop,
-   though it still cannot separate two same-day sessions. The Commits table gains a leading **`Repo`** column;
-   rows are grouped by repo. (Files Modified stays THIS-repo-scoped — sibling files live in their own repos;
-   capture sibling file work in prose, not a table.)
-2. **Gate 6 hash allowlist = the union set.** Every hash-shaped token in the handoff must exist in the
-   union `COMMITS_TSV` (this repo ∪ siblings), not just this repo's — otherwise legitimate sibling-repo
-   hashes false-fail as "fabricated." Build `SCAFFOLD_HASHES` from the union.
+Two project augmentations, both applied while the agent executes **Step 1 — "Write the handoff"** (there is
+no separate scaffold sub-step in `core-handoff.md` to anchor them to; Step 1 is where Commits, Files
+Modified, and Infrastructure State are all assembled directly from git state, so the augmentation is folded
+into that assembly rather than bolted on as a gate):
 
-`INFRA_PROBES` for Phase 2's Infrastructure-State section: one line per repo (`THIS` + `SIBLING_REPOS`) —
+1. **Commits set is the UNION across `THIS repo + SIBLING_REPOS`.** While assembling the Commits section in
+   Step 1, after building this repo's commit set, append each sibling's session commits. **Derive a
+   sibling's session commits by SHA range, not by date:** parse that sibling's prior HEAD short-SHA from the
+   **prior handoff's Infrastructure-State section** (the `<repo>: <branch>@<short-sha>` line this override
+   writes — see `INFRA_PROBES` below) and run `git -C <sibling> log <prior-sha>..HEAD --format=...`. This is
+   exact and **same-day-robust**. *Why not `--since=<prior-handoff-date>` (the original approach —
+   replaced):* git resolves a bare, time-less date to the **current time-of-day**, not midnight, so on any
+   same-calendar-day run `--since=<today>` silently drops every sibling commit made earlier that day — a
+   total miss, not mere coarseness (caught session-9: it returned ZERO across all three siblings, all
+   committed earlier the same day). **Fallback** only if a baseline SHA is unparseable (e.g. a prior handoff
+   predating this override's Infrastructure-State format): `git -C <sibling> log --since="<date> 00:00:00"
+   ...` — the explicit midnight defeats the time-of-day drop, though it still cannot separate two same-day
+   sessions. The Commits table gains a leading **`Repo`** column; rows are grouped by repo. (Files Modified
+   stays THIS-repo-scoped — `core-handoff.md`'s Files Modified table is native `git diff --numstat` output
+   for the current repo only; sibling file work goes in prose/Notes, not a table.)
+2. **There is no Gate-6-equivalent augmentation in `core-handoff.md`, and none is added.** The hybrid
+   module's Gate 6 was a hash/path "no-extras" fabrication check needed only because that module delegated
+   prose generation to Gemini Flash, which could invent sibling-repo-shaped hashes; widening its allowlist to
+   the cross-repo union was this override's second augmentation. `core-handoff.md` has no delegated-LLM
+   prose step — Claude writes the Commits table directly from git output it already holds, for both this
+   repo and each sibling — so the entire class of risk Gate 6 defended against does not exist here. This
+   augmentation point is dropped, not translated; no replacement gate is introduced.
+
+`INFRA_PROBES` for Phase 2's Infrastructure-State section (populated as part of Step 1, unchanged from
+before): one line per repo (`THIS` + `SIBLING_REPOS`) —
 `<repo>: <branch>@<short-sha>, <public|private>, <CI state>, <pushed|N-ahead>`, collected via
 `git -C <repo> log -1` + `gh repo view`/`gh run list` (best-effort; skip gh if unavailable).
 
-Everything else (the §core-handoff 7 properties, the size-gate direct-write path, archiving) is the base
-module's behaviour, unchanged.
+Everything else (the §core-handoff 7 properties, the write-before-archive ordering, the bounded-retention
+archiving, the optional Gemini-usage cost-capture line) is the base module's behaviour, unchanged.
 
 ## Authorisation + hard rails
 
