@@ -7,6 +7,9 @@ gist: Per-project task tracker template for template-ai-monorepo planning artifa
 
 # Project Tracker
 
+Last-updated: 2026-07-05 <!-- refresh to the current date (yyyy-mm-dd) on every edit; REF-PLANNING-ARTIFACTS cross-cutting rule -->
+
+
 <!--
 USAGE: Copy this template per project/iteration. Replace the rows below with real
 tasks; one row per discrete, reviewable unit of work. Status values: TODO,

@@ -16,7 +16,7 @@ The base Phase-2 handoff is cwd-scoped, so it under-represents a session whose r
 siblings — the Phase-2 extension below adds that breadth.
 
 ## Adopted / diverged conventions
-- **Adopted:** single-file registers under `docs/registers/` + `docs/planning/`; dated handoffs in
+- **Adopted:** single-file registers under `docs/planning/`; dated handoffs in
   `docs/sessions/` (gitignored — local-only journal); git without worktree parallelism; Claude Code task
   primitives for background state.
 - **Omitted:** worktrees, cache manifest.

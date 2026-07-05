@@ -51,7 +51,7 @@ crossing the base↔python seam (WS-6 #2).
 ## 3. Partition Map (WS-1)
 
 Authoritative file set: `git ls-files` = **59 tracked files** at spike time (exhaustive against the live
-tree). The count **excludes this spike's own two meta-docs** (`docs/planning/spike-copier-partition.md`,
+tree). The count **excludes this spike's own two meta-docs** (`docs/spike-copier-partition.md`,
 `docs/adr/0004-*.md`) — committing them makes the tree 61, both **user-data-class** by the `docs/planning/*`
 and `docs/adr/≥0004` rules below (no explicit row needed; class-covered). Layer key: **base**
 (template-governance-base), **python-stack**, **mcp-capability**, **user-data**; `+` = genuine split-ownership.

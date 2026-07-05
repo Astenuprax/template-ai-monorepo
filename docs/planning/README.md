@@ -7,42 +7,44 @@ gist: Lean Tier-0 planning templates (PLAN/TRACKER/DONE) demonstrating the proje
 
 # Planning Templates (Tier-0)
 
-This directory holds **lean Tier-0 planning templates** for `template-ai-monorepo`. They
-demonstrate the `project-planning-artifacts` methodology so that anyone cloning this
-template has a working planning surface from the first commit.
+This directory holds the **Tier-0 planning surface** for `template-ai-monorepo`, following the
+`project-planning-artifacts` methodology so that anyone cloning this template has a working
+planning surface from the first commit.
 
-These files are **empty scaffolds**. They carry **no real project state** — every line is a
-placeholder to be replaced when the template is cloned and a concrete project begins. Treat
-them as the shape of the methodology, not as a record of work.
+As the archetype's reference impl this repo wears two hats: `ROADMAP.md` and `DEBT.md` carry
+**real state** for this repo's own work, while `TRACKER.md` and `DONE.md` are **scaffolds** a
+cloner fills per project. Decision content lives in `docs/adr/`, never in these files.
 
 ## What Tier-0 means
 
 Tier-0 is the minimum durable planning surface a project needs to stay legible without
-incurring process overhead. It is three files, no more:
+incurring process overhead. It is the four-file quartet (rate-of-change separated):
 
 | File | Role | Holds |
 |---|---|---|
-| `PLAN.md` | Intent | The goal, scope boundaries, constraints, and the ordered approach. The *what* and *why*. |
+| `ROADMAP.md` | Strategic arc | Where this is headed — target end-state + phased milestones. Decisions cited by ADR ID; zero decision content. Created lazily, once real roadmap content exists. |
 | `TRACKER.md` | Live state | Open work items, their status, blockers, and next action. The single source of in-flight truth. |
-| `DONE.md` | Closed record | Completed items and explicitly deferred/abandoned decisions (with reason). Append-only. |
+| `DONE.md` | Closed record | Completed, verified work. Append-only. |
+| `DEBT.md` | Deferred / gaps | Consciously-deferred work and known gaps, each with a reason and a trigger to revisit. The single home for "not yet done" work. |
 
 One durable state surface per repo: `TRACKER.md` is authoritative for what is in flight.
 Agent or session memory is not a substitute for it. When an item closes, move it from
-`TRACKER.md` to `DONE.md` rather than deleting it — the deferral record is part of the
-project's history.
+`TRACKER.md` to `DONE.md` rather than deleting it; consciously-deferred work goes to
+`DEBT.md`, not `DONE.md`.
 
 ## How to use these (per clone)
 
-1. **Fill `PLAN.md` first.** State the real goal, scope in/out, and the constraints
-   (quality gate is ruff + pyright strict + pytest, plus the structure-lint gate at
-   `tests/test_structure.py` and `.pre-commit-config.yaml`). Define done before starting.
+1. **Frame direction in `ROADMAP.md`** (lazily — once you have a real target end-state and
+   phased path). State the strategic arc and constraints (quality gate is ruff + pyright
+   strict + pytest, plus the structure-lint gate at `tests/test_structure.py` and
+   `.pre-commit-config.yaml`). Keep decisions in `docs/adr/`, not here.
 2. **Work through `TRACKER.md`.** Add discrete, checkable items. Update status as work
    progresses — do not batch updates at the end. Record blockers inline.
-3. **Close into `DONE.md`.** When an item is finished or a decision is deferred, append it
-   with a one-line outcome. Keep `TRACKER.md` lean.
+3. **Close into `DONE.md`** (completed work) **and `DEBT.md`** (deferred work / known gaps,
+   with a reason and a trigger). Keep `TRACKER.md` lean.
 
-Do not commit these scaffolds unchanged as if they were a real plan. A cloned project with
-the placeholder text still present has not started planning.
+Do not commit the `TRACKER.md`/`DONE.md` scaffolds unchanged as if they were a real plan. A
+cloned project with the placeholder text still present has not started planning.
 
 ## Governance alignment
 

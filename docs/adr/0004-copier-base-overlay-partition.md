@@ -10,7 +10,7 @@ gist: Adopt a Copier governance base + per-stack overlays (base + python-stack +
 **Status:** VERIFIED (independent Tier-0 review returned GO-WITH-CHANGES on both lenses; all findings folded — see §Independent review).
 **Date:** 2026-06-30.
 **Supersedes/relates:** builds on ADR-0001 (uv workspace). Decision record only — the full evidence,
-partition map, and dry-run results live in `docs/planning/spike-copier-partition.md` (REF-SPIKE-COPIER-001).
+partition map, and dry-run results live in `docs/spike-copier-partition.md` (REF-SPIKE-COPIER-001).
 
 ## Context
 
