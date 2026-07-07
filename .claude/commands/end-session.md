@@ -36,17 +36,20 @@ Pass at Step 1:
 - **Phase 2 gate widens:** run the handoff when commits ≠ ∅ in THIS repo **OR any `SIBLING_REPOS`** OR
   modified files ≠ ∅.
 - **Phase 2 extension (contract-bearing — adds breadth, drops none of the §core-handoff floor):** while
-  authoring the handoff (module step 1), the **Commits set is the UNION across `THIS repo + SIBLING_REPOS`**,
-  with a leading `Repo` column, rows grouped by repo. The driver's `commitsTable` rows cover THIS repo;
-  **derive each sibling's session commits by SHA range, not by date:** parse the sibling's prior HEAD
-  short-SHA from the **prior handoff's Infrastructure-State line** (the `<repo>: <branch>@<short-sha>` format
-  above) and run `git -C <sibling> log <prior-sha>..HEAD`. *Why not `--since=<date>`:* git resolves a bare
-  date to the current time-of-day, silently dropping every sibling commit made earlier the same day (total
-  miss, caught session-9). **Fallback** only if a baseline SHA is unparseable:
-  `git -C <sibling> log --since="<date> 00:00:00"` — explicit midnight defeats the time-of-day drop, though
-  it cannot separate two same-day sessions. Files Modified stays THIS-repo-scoped (sibling file work goes in
-  prose/Notes). No fabrication gate is added: Claude writes the table directly from git output it holds —
-  the delegated-LLM-prose risk class the retired hybrid module's Gate 6 defended against does not exist here.
+  authoring the handoff (module step 1), the **Commit-range line's attribution notes UNION across
+  `THIS repo + SIBLING_REPOS`** — the range line itself (`<fromSha>..<toSha> (N commits)`) stays THIS-repo-scoped
+  from the driver's `fromSha`/`toSha`/`count` fields; each sibling gets its own attribution note (repo, sha
+  range, commit count/subjects) appended below the range line, not a separate table. **Derive each sibling's
+  session commits by SHA range, not by date:** parse the sibling's prior HEAD short-SHA from the **prior
+  handoff's Infrastructure-State line** (the `<repo>: <branch>@<short-sha>` format above) and run
+  `git -C <sibling> log <prior-sha>..HEAD`. *Why not `--since=<date>`:* git resolves a bare date to the
+  current time-of-day, silently dropping every sibling commit made earlier the same day (total miss, caught
+  session-9). **Fallback** only if a baseline SHA is unparseable: `git -C <sibling> log --since="<date>
+  00:00:00"` — explicit midnight defeats the time-of-day drop, though it cannot separate two same-day
+  sessions. Sibling file-level detail goes in prose/Notes for Next Session, never a Files-Modified table
+  (retired from the base template — D3). No fabrication gate is added: Claude writes the attribution notes
+  directly from git output it holds — the delegated-LLM-prose risk class the retired hybrid module's Gate 6
+  defended against does not exist here.
 - **Authorisation delta:** the end-session grant covers commits + the `confirm` push **in THIS repo only**.
   Sibling-repo and governance-estate commits are **outside** the grant — surface them (Phase 1 reminder;
   Phase 8 cross-repo sweep), never auto-commit.
