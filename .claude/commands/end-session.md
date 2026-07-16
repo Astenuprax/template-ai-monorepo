@@ -2,7 +2,7 @@
 description: Repo-Template end-session — thin override; inherits the user-scope orchestrator and extends Phase 2 to aggregate commits across the family's sibling overlay repos.
 alias: /end-session
 targets-spec: CORE-END-SESSION
-spec_version: "2026-07-04 (Wave-2 driver)"
+spec_version: "2026-07-17 (Python driver)"
 ---
 
 # /end-session — Repo-Template (thin override, cross-repo family)
@@ -23,7 +23,7 @@ siblings — the Phase-2 extension below adds that breadth.
 
 ## Bindings (non-detectable only)
 Pass at Step 1:
-`-Bindings '{"REGISTER_ACTIVE":"docs/planning/DEBT.md","REGISTER_RESOLVED":"docs/planning/DEBT.md","ID_PREFIXES":"D|WS|ADR"}'`
+`--bindings '{"REGISTER_ACTIVE":"docs/planning/DEBT.md","REGISTER_RESOLVED":"docs/planning/DEBT.md","ID_PREFIXES":"D|WS|ADR"}'`
 | Binding | Value |
 |---|---|
 | `REGISTER_ACTIVE` | `docs/planning/DEBT.md` (outside Probe's candidate list) |
