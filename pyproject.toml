@@ -22,7 +22,7 @@ example-mcp-server = { workspace = true }
 dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
-    "ruff>=0.7",
+    "ruff>=0.15.22",
     "pyright>=1.1.380",
 ]
 
