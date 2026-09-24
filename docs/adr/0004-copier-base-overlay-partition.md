@@ -7,7 +7,7 @@ gist: Adopt a Copier governance base + per-stack overlays (base + python-stack +
 
 # ADR-0004 — Copier base+overlay partition for the template family
 
-**Status:** VERIFIED (independent Tier-0 review returned GO-WITH-CHANGES on both lenses; all findings folded — see §Independent review).
+**Status:** Accepted (independent Tier-0 review returned GO-WITH-CHANGES on both lenses; all findings folded — see §Independent review).
 **Date:** 2026-06-30.
 **Supersedes/relates:** builds on ADR-0001 (uv workspace). Decision record only — the full evidence,
 partition map, and dry-run results live in `docs/spike-copier-partition.md` (REF-SPIKE-COPIER-001).
