@@ -1,0 +1,37 @@
+# OSSF Scorecard supply-chain posture analysis. Scorecard requires a PUBLIC repository, so
+# this workflow is INERT while the repo is private — it is wired and ready to activate on
+# going public (publish_results then populates the public Scorecard API + badge). All actions
+# are SHA-pinned (supply-chain mandate; enforced by the structure-lint gate).
+name: scorecard
+
+on:
+  branch_protection_rule:
+  schedule:
+    - cron: "0 2 * * 1"
+  push:
+    branches: [main]
+
+permissions: read-all
+
+jobs:
+  analysis:
+    name: scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ossf/scorecard-action@23f22cd43608bae7a1f1fa2603d7314dee9538a5 # v2.6.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: scorecard-results
+          path: results.sarif
+          retention-days: 5

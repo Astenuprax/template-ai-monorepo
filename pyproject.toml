@@ -1,0 +1,72 @@
+# Workspace root (virtual — not itself a distributable package).
+# Members are built/installed individually; the workspace shares ONE uv.lock + ONE venv.
+# Isolation semantics: import-namespace + separately-buildable distributions — NOT per-service
+# dependency isolation (a deliberate dev-convenience; see docs/adr/0001-uv-workspace.md).
+[project]
+name = "template-ai-monorepo"
+version = "0"
+description = "Production-minded Python 3.12+ AI monorepo template: uv workspace, pydantic-ai agent, FastMCP stdio server, strict pyright/ruff, SBOM & OSV supply-chain gates."
+requires-python = ">=3.12"
+readme = "README.md"
+
+[tool.uv.workspace]
+members = ["packages/*", "services/*"]
+
+[tool.uv.sources]
+platform-core = { workspace = true }
+example-mcp-server = { workspace = true }
+
+# Dev tooling pinned in the lock (reproducible) and run via `uv run` so it sees the workspace venv.
+# pyright in particular MUST run inside the venv to resolve first/third-party imports.
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.7",
+    "pyright>=1.1.380",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["packages/platform-core/src", "services/example-mcp-server/src"]
+
+[tool.ruff.lint]
+# E/F/I/B/UP/SIM: style, pyflakes, import-sort, bugbear, pyupgrade, simplify.
+# ASYNC: async-correctness (the codebase runs asyncio_mode="auto").
+# S: bandit security rules (an MCP server processes untrusted tool input).
+# RUF: ruff's own lints (e.g. unused noqa, mutable-default surface).
+select = ["E", "F", "I", "B", "UP", "SIM", "ASYNC", "S", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests legitimately use bare `assert` (S101) — that's how pytest asserts.
+"tests/**" = ["S101"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+pythonVersion = "3.12"
+include = ["packages", "services", "tests"]
+venvPath = "."
+venv = ".venv"
+
+# Authoritative declaration of the structure-standard version this repo conforms to.
+# tests/test_structure.py asserts its CONFORMS_TO_STRUCTURE_VERSION matches this value,
+# so bumping the rules without bumping this (or vice-versa) fails the gate.
+[tool.structure_lint]
+version = 2
+root_required = [
+  "README.md", "LICENSE", "NOTICE", "CHANGELOG.md", "CODE_OF_CONDUCT.md",
+  "CONTRIBUTING.md", "SECURITY.md", "AGENTS.md", "CLAUDE.md", ".gitignore", ".editorconfig",
+  "pyproject.toml", "uv.lock", ".pre-commit-config.yaml", ".python-version",
+]
+py_source_roots = ["packages", "services", "tests"]
+member_roots = ["packages", "services"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-ra"
+markers = [
+    "integration: live stdio MCP round-trip / agent-to-server integration tests (excluded from unit-only runs)",
+]
