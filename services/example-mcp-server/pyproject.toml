@@ -9,7 +9,7 @@ requires-python = ">=3.12"
 dependencies = [
     "platform-core",
     # Pin <2 as a stabilizing holdover until migrating FastMCP -> mcp.server.MCPServer under mcp>=2.
-    "mcp>=1.2,<2",
+    "mcp>=1.2,<3",
 ]
 
 [project.scripts]
